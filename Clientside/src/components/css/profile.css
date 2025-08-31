@@ -1,0 +1,249 @@
+.profile-page {
+  background-color: #FFD1DC;
+  min-height: 100vh;
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* 🌙 Dark mode override */
+body.dark .profile-page {
+  background-color: #1a1a1a; /* dark neutral */
+}
+
+.profile-left {
+  flex: 0 0 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-card,
+.stats-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* 🌙 Dark mode override */
+body.dark .profile-card,
+body.dark .stats-card {
+  background: #242424;
+  color: #f1f1f1;
+}
+
+.profile-image img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+}
+
+/* 🌙 Dark border for images */
+body.dark .profile-image img {
+  border: 3px solid #333;
+}
+
+.profile-role {
+  background: purple;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+.contact-info {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* 🌙 Dark mode override */
+body.dark .contact-info {
+  color: #bbb;
+}
+
+.logout-btn {
+  background: red;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.stat-num {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.profile-right {
+  flex: 1;
+}
+
+.tab-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab-header button {
+  flex: 1;
+  padding: 10px;
+  background: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* 🌙 Dark mode override */
+body.dark .tab-header button {
+  background: #2a2a2a;
+  color: #f1f1f1;
+}
+
+.tab-header button.active {
+  background: rgb(5, 25, 203);
+  color: white;
+}
+
+.tab-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s, color 0.3s;
+}
+
+/* 🌙 Dark mode override */
+body.dark .tab-content {
+  background: #242424;
+  color: #f1f1f1;
+}
+
+.tab-content label {
+  display: block;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.tab-content input,
+.tab-content textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #000;
+  transition: background 0.3s, color 0.3s, border 0.3s;
+}
+
+/* 🌙 Dark mode override */
+body.dark .tab-content input,
+body.dark .tab-content textarea {
+  background: #333;
+  color: #f1f1f1;
+  border: 1px solid #555;
+}
+
+.edit-btn {
+  margin-top: 15px;
+  background: red;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.toggle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 28px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4cafef;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+.slider.round {
+  border-radius: 28px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.back-btn-container {
+  margin: 10px 0 20px 10px;
+}
+
+.back-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #0056b3;
+}

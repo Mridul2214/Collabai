@@ -1,0 +1,169 @@
+/* Background with gradient */
+.kanban-container {
+  background: linear-gradient(135deg, #111520, #0c0d0f, #061839);
+  min-height: 100vh;
+  color: white;
+  padding: 30px 20px;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* Header */
+.kanban-container h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #f8fafc;
+  text-shadow: 0px 3px 8px rgba(0, 0, 0, 0.5);
+  letter-spacing: 1px;
+}
+
+/* Add task section */
+.add-task {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 35px;
+  gap: 12px;
+}
+
+.add-task input {
+  padding: 12px 15px;
+  border-radius: 12px;
+  border: none;
+  width: 300px;
+  font-size: 15px;
+  outline: none;
+  color: #f1f5f9;
+  background-color: #1e293b;
+  box-shadow: inset 0px 2px 6px rgba(0,0,0,0.4);
+  transition: box-shadow 0.3s;
+}
+
+.add-task input:focus {
+  box-shadow: 0px 0px 8px #2563eb;
+}
+
+.add-task button {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border: none;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s, background 0.3s;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.4);
+}
+
+.add-task button:hover {
+  background: linear-gradient(135deg, #1e40af, #1d4ed8);
+  transform: scale(1.05);
+}
+
+/* Board Layout */
+.kanban-board {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  flex-wrap: wrap;
+  padding: 10px;
+}
+
+/* Column */
+.kanban-column {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 20px;
+  width: 310px;
+  box-shadow: 0px 8px 20px rgba(0,0,0,0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kanban-column:hover {
+  transform: translateY(-6px);
+  box-shadow: 0px 12px 25px rgba(0,0,0,0.5);
+}
+
+.kanban-column h2 {
+  font-size: 1.5rem;
+  margin-bottom: 18px;
+  border-bottom: 2px solid rgba(255,255,255,0.2);
+  padding-bottom: 8px;
+  color: #e2e8f0;
+}
+
+/* Task */
+.kanban-task {
+  background: linear-gradient(135deg, #374151, #1f2937);
+  padding: 16px;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0px 5px 12px rgba(0,0,0,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kanban-task:hover {
+  transform: scale(1.03);
+  box-shadow: 0px 8px 16px rgba(0,0,0,0.6);
+}
+
+/* Task info */
+.task-info {
+  flex: 1;
+  padding-right: 8px;
+}
+
+.task-text {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.task-date {
+  display: block;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* Task Buttons */
+.task-buttons button {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-left: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform 0.2s, background 0.3s;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.3);
+}
+
+.task-buttons button:nth-child(1) {
+  background: #253651; /* Move left */
+  color: white;
+}
+
+.task-buttons button:nth-child(2) {
+  background: #cbcea8; /* Move forward */
+  color: #111827;
+}
+
+.task-buttons button:nth-child(3) {
+  background: #92c3a4; /* Edit */
+  color: white;
+}
+
+.task-buttons button:nth-child(4) {
+  background: #990d0d; /* Delete */
+  color: white;
+}
+
+.task-buttons button:hover {
+  transform: scale(1.1);
+  opacity: 0.9;
+}

@@ -1,0 +1,213 @@
+/* Container */
+.editor-container {
+  position: fixed; /* take full screen */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  padding: 20px 40px;
+  background: #f9f9f9;
+  overflow-y: auto; /* scroll if content is too long */
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+/* Title input */
+.title-input {
+  width: 100%;
+  font-size: 1.8rem;
+  font-weight: bold;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: 0.2s;
+  color: #333;
+  background: #fff;
+}
+
+.title-input::placeholder {
+  color: #aaa;
+}
+
+.title-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0,123,255,0.3);
+}
+
+/* Toolbar */
+.toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+/* Buttons and selects */
+.toolbar-actions .btn,
+.toolbar-actions select,
+.toolbar-actions input[type="color"] {
+  padding: 6px 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: 0.2s;
+  background: #fff;
+  color: #333;
+}
+
+.toolbar-actions .btn:hover {
+  background: #f0f0f0;
+}
+
+.toolbar-actions .btn.active {
+  background: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+/* Editor area */
+.text-editor {
+  min-height: 60vh; /* large editor */
+  max-height: 70vh;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  outline: none;
+  overflow-y: auto;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* Placeholder for contentEditable */
+.text-editor:empty::before {
+  content: attr(data-placeholder);
+  color: #aaa;
+  pointer-events: none;
+  display: block;
+}
+
+/* Version history */
+.version-history {
+  margin-top: 25px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  color: #333;
+}
+
+.version-history h3 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.version-history ul {
+  list-style: none;
+  padding: 0;
+}
+
+.version-history li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 0.95rem;
+}
+
+.version-history li button {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.version-history li button:hover {
+  background: #0056b3;
+}
+
+.btn.save {
+  background: #28a745;
+  color: #fff;
+  border-color: #28a745;
+}
+
+.btn.save:hover {
+  background: #218838;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .editor-container {
+    padding: 15px 20px;
+  }
+  .text-editor {
+    min-height: 50vh;
+    max-height: 60vh;
+  }
+}
+
+body.dark .editor-container {
+  background: #1a1a1a;
+  color: #e0e0e0;
+}
+
+body.dark .title-input {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  color: #e0e0e0;
+}
+
+body.dark .title-input::placeholder {
+  color: #777;
+}
+
+body.dark .toolbar-actions .btn,
+body.dark .toolbar-actions select,
+body.dark .toolbar-actions input[type="color"] {
+  background: #2a2828;
+  border: 1px solid #2d2a2a;
+  color: #e0e0e0;
+}
+
+
+body.dark .toolbar-actions .btn:hover {
+  background: #2f2d2d;
+}
+
+
+body.dark .text-editor {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  color: #e0e0e0;
+}
+
+body.dark .text-editor:empty::before {
+  color: #666;
+}
+
+body.dark .version-history {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  color: #e0e0e0;
+}
+
+body.dark .version-history li {
+  border-bottom: 1px solid #333;
+}
+
+body.dark .toolbar-actions .btn.active {
+  background: #0056b3;
+  color: #fff;
+  border-color: #0056b3;
+}

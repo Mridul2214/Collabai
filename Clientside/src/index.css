@@ -1,0 +1,31 @@
+/* Default light mode */
+body {
+  background-color: #f9f9f9;
+  color: #222;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Dark mode */
+body.dark {
+  background-color: #121212;
+  color: #f1f1f1;
+}
+
+.profile-card,
+.stats-card,
+.tab-content {
+  background: white;
+  color: black;
+  transition: background 0.3s, color 0.3s;
+}
+
+body.dark .profile-card,
+body.dark .stats-card,
+body.dark .tab-content {
+  background: #1e1e1e;
+  color: #f1f1f1;
+}
+
+button {
+  transition: background 0.3s, color 0.3s;
+}
