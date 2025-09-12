@@ -22,65 +22,50 @@ const Aichat = () => {
   const chatMessagesRef = useRef(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+const sendMessage = async () => {
+  if (!input.trim() || isLoading) return;
 
-    setIsLoading(true);
-    setError(null);
-    const userMessage = { text: input, sender: "user" };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+  setIsLoading(true);
+  setError(null);
+  const userMessage = { text: input, sender: "user" };
+  setMessages((prev) => [...prev, userMessage]);
+  setInput("");
 
-    try {
-      const response = await fetch("http://localhost:3000/api/ai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          message: input,
-          chatHistory: messages,
-        }),
-      });
+  try {
+    const response = await fetch("http://localhost:3000/api/ai", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({
+        message: input,
+        chatHistory: messages,
+      }),
+    });
 
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
+    if (!response.ok)
+      throw new Error(`API request failed with status ${response.status}`);
 
-      const data = await response.json();
-      setMessages(data.chatHistory);
+    const data = await response.json();
+    setMessages(data.chatHistory);
 
-
-
-      // ANALYTICS TRACKING - Added after successful AI response
-      try {
-        const token = localStorage.getItem("token");
-        await axios.post('/api/analytics', {
-          aiSearch: input
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      } catch (analyticsError) {
-        console.error("Analytics tracking failed:", analyticsError);
-        // Don't show this error to the user as it doesn't affect the chat functionality
-      }
-
-    } catch (err) {
-      console.error("Chat error:", err);
-      setError(err.message);
-      setMessages((prev) => [
-        ...prev,
-        {
-          text: "Sorry, I couldn't process your request. Please try again.",
-          sender: "ai",
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+    // ✅ FIXED Analytics Tracking - match backend ("ai_chat")
+    const token = localStorage.getItem("token");
+    await axios.post(
+      "http://localhost:3000/api/analytics",
+      {
+        type: "ai_chat", // <-- FIXED
+        meta: { message: input },
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
 
   const handleSuggestionClick = (topic) => {
@@ -98,6 +83,9 @@ const Aichat = () => {
     inputRef.current?.focus();
   }, []);
 
+
+
+
   // detect when to show scroll button
   useEffect(() => {
     const chatBox = chatMessagesRef.current;
@@ -111,6 +99,7 @@ const Aichat = () => {
     chatBox?.addEventListener("scroll", handleScroll);
     return () => chatBox?.removeEventListener("scroll", handleScroll);
   }, []);
+
 
   const renderFormattedMessage = (text) => {
     return text.split("\n").map((line, i) => {

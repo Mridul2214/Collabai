@@ -1,106 +1,237 @@
-// import Analytics from "../models/analytics.js";
-// import { GoogleGenerativeAI } from "@google/generative-ai";
+// controllers/analyticsController.js
+import Analytics from "../models/analytics.js";
+import AiChat from "../models/aichat.js";
+import Document from "../models/document.js";
+import Todo from "../models/Todo.js";
+import Whiteboard from "../models/board.js";
 
-// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Track user activity
+export const trackActivity = async (userId, activityType, details = {}) => {
+  try {
+    const activity = new Analytics({
+      userId,
+      activityType,
+      details,
+      timestamp: new Date()
+    });
+    
+    await activity.save();
+    return activity;
+  } catch (error) {
+    console.error("Error tracking activity:", error);
+  }
+};
 
-// // ✅ Create or update analytics
-// export const updateAnalytics = async (req, res) => {
-//   try {
-//     const userId = req.user.id;
-//     const { timeSpent, aiSearch, todoCompleted, todoPending } = req.body;
-
-//     let analytics = await Analytics.findOne({ userId });
-
-//     if (!analytics) {
-//       analytics = new Analytics({ userId });
-//     }
-
-//     if (timeSpent) analytics.timeSpent += timeSpent;
-//     if (aiSearch) analytics.aiSearches.push(aiSearch);
-//     if (todoCompleted !== undefined) analytics.todos.completed = todoCompleted;
-//     if (todoPending !== undefined) analytics.todos.pending = todoPending;
-
-//     analytics.lastUpdated = Date.now();
-//     await analytics.save();
-
-//     res.json({
-//       success: true,
-//       analytics: {
-//         timeSpent: analytics.timeSpent,
-//         aiSearches: analytics.aiSearches,
-//         todos: analytics.todos,
-//         lastUpdated: analytics.lastUpdated
-//       }
-//     });
-//   } catch (err) {
-//     console.error("Update analytics error:", err);
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
-// // 📊 Get analytics
+// Get analytics data for dashboard
 // export const getAnalytics = async (req, res) => {
 //   try {
-//     const { userId } = req.params;
-//     const analytics = await Analytics.findOne({ userId });
-
-//     if (!analytics) {
-//       return res.status(200).json({ 
-//         timeSpent: 0,
-//         aiSearches: [],
-//         todos: { completed: 0, pending: 0 },
-//         message: "No analytics data found. Start using the app to generate data."
-//       });
+//     const { timeRange = "week", userId } = req.query;
+//     const targetUserId = userId || req.user._id;
+    
+//     // Calculate date range
+//     const now = new Date();
+//     let startDate;
+    
+//     switch (timeRange) {
+//       case "day":
+//         startDate = new Date(now.setDate(now.getDate() - 1));
+//         break;
+//       case "week":
+//         startDate = new Date(now.setDate(now.getDate() - 7));
+//         break;
+//       case "month":
+//         startDate = new Date(now.setMonth(now.getMonth() - 1));
+//         break;
+//       case "quarter":
+//         startDate = new Date(now.setMonth(now.getMonth() - 3));
+//         break;
+//       default:
+//         startDate = new Date(now.setDate(now.getDate() - 7));
 //     }
+    
+//     // Get activities in time range
+//     const activities = await Analytics.find({
+//       userId: targetUserId,
+//       timestamp: { $gte: startDate }
+//     }).sort({ timestamp: 1 });
+    
+//     // Process data for charts
+//     const siteVisits = await processSiteVisits(activities, startDate);
+//     const aiBotUsage = await processAiBotUsage(activities, startDate);
+//     const todoStatus = await processTodoStatus(targetUserId);
+//     const whiteboardUsage = await processWhiteboardUsage(activities, startDate);
     
 //     res.json({
-//       timeSpent: analytics.timeSpent,
-//       aiSearches: analytics.aiSearches,
-//       todos: analytics.todos,
-//       lastUpdated: analytics.lastUpdated
+//       siteVisits,
+//       aiBotUsage,
+//       todoStatus,
+//       whiteboardUsage
 //     });
-//   } catch (err) {
-//     console.error("Get analytics error:", err);
-//     res.status(500).json({ error: "Failed to fetch analytics data" });
+//   } catch (error) {
+//     console.error("Error getting analytics:", error);
+//     res.status(500).json({ message: "Server error" });
 //   }
 // };
 
-// // 🤖 AI insights
-// export const getAIInsights = async (req, res) => {
-//   try {
-//     const { userId } = req.params;
-//     const analytics = await Analytics.findOne({ userId });
+// controllers/analyticsController.js
 
-//     if (!analytics || !analytics.timeSpent) {
-//       return res.json({ 
-//         insights: "Not enough data yet to generate insights. Continue using the app to see personalized recommendations." 
-//       });
-//     }
+export const getAnalytics = async (req, res) => {
+  try {
+    // fetch activities only for the logged-in user
+    const analytics = await Analytics.find({ userId: req.user._id }).sort({ timestamp: -1 });
 
-//     const prompt = `
-//     Analyze this user's activity and provide concise, helpful insights:
-//     - Time spent on platform: ${analytics.timeSpent} minutes
-//     - AI searches: ${analytics.aiSearches.join(", ") || "None yet"}
-//     - Todos completed: ${analytics.todos.completed}
-//     - Todos pending: ${analytics.todos.pending}
+    res.json(analytics);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch analytics", error });
+  }
+};
 
-//     Provide 2-3 brief insights about:
-//     1. Their productivity patterns
-//     2. Interests based on search topics
-//     3. One suggestion for improvement
+// Process site visits data
+const processSiteVisits = async (activities, startDate) => {
+  // Group activities by day
+  const days = [];
+  const dayCounts = {};
+  
+  // Initialize days array
+  const currentDate = new Date(startDate);
+  const today = new Date();
+  
+  while (currentDate <= today) {
+    const dateStr = currentDate.toISOString().split('T')[0];
+    days.push(dateStr);
+    dayCounts[dateStr] = 0;
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  // Count activities per day
+  activities.forEach(activity => {
+    const dateStr = activity.timestamp.toISOString().split('T')[0];
+    if (dayCounts[dateStr] !== undefined) {
+      dayCounts[dateStr]++;
+    }
+  });
+  
+  // Format for chart
+  const labels = days.map(day => {
+    const date = new Date(day);
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
+  });
+  
+  const data = days.map(day => dayCounts[day]);
+  
+  return { labels, data };
+};
 
-//     Keep it friendly and actionable, under 150 words.
-//     `;
+// Process AI bot usage
+const processAiBotUsage = async (activities, startDate) => {
+  const aiActivities = activities.filter(a => a.activityType === "ai_chat");
+  
+  // Group by day
+  const days = [];
+  const dayCounts = {};
+  
+  const currentDate = new Date(startDate);
+  const today = new Date();
+  
+  while (currentDate <= today) {
+    const dateStr = currentDate.toISOString().split('T')[0];
+    days.push(dateStr);
+    dayCounts[dateStr] = 0;
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  // Count AI interactions per day
+  aiActivities.forEach(activity => {
+    const dateStr = activity.timestamp.toISOString().split('T')[0];
+    if (dayCounts[dateStr] !== undefined) {
+      dayCounts[dateStr]++;
+    }
+  });
+  
+  // Format for chart
+  const labels = days.map(day => {
+    const date = new Date(day);
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
+  });
+  
+  const data = days.map(day => dayCounts[day]);
+  
+  return { labels, data };
+};
 
-//     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-//     const result = await model.generateContent(prompt);
-//     const response = await result.response;
-    
-//     res.json({ insights: response.text() });
-//   } catch (err) {
-//     console.error("AI insights error:", err);
-//     res.json({ 
-//       insights: "Unable to generate AI insights at the moment. Please try again later." 
-//     });
-//   }
-// };
+// Process todo status
+const processTodoStatus = async (userId) => {
+  const todos = await Todo.find({ userId });
+  
+  const statusCounts = {
+    todo: 0,
+    inprogress: 0,
+    done: 0
+  };
+  
+  todos.forEach(todo => {
+    statusCounts[todo.status]++;
+  });
+  
+  return statusCounts;
+};
+
+// Process whiteboard usage
+const processWhiteboardUsage = async (activities, startDate) => {
+  const whiteboardActivities = activities.filter(a => a.activityType === "whiteboard_edit");
+  
+  // Group by day
+  const days = [];
+  const dayCounts = {};
+  
+  const currentDate = new Date(startDate);
+  const today = new Date();
+  
+  while (currentDate <= today) {
+    const dateStr = currentDate.toISOString().split('T')[0];
+    days.push(dateStr);
+    dayCounts[dateStr] = 0;
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  // Count whiteboard activities per day
+  whiteboardActivities.forEach(activity => {
+    const dateStr = activity.timestamp.toISOString().split('T')[0];
+    if (dayCounts[dateStr] !== undefined) {
+      dayCounts[dateStr]++;
+    }
+  });
+  
+  // Format for chart
+  const labels = days.map(day => {
+    const date = new Date(day);
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
+  });
+  
+  const data = days.map(day => dayCounts[day]);
+  
+  return { labels, data };
+};
+
+
+// Store events in DB or log them
+export const trackAnalytics = async (req, res) => {
+  try {
+    const { type, todoId, newTitle, todoCompleted, todoPending } = req.body;
+
+    // For now, just log to console (later you can store in MongoDB)
+    console.log("Analytics event:", {
+      user: req.user.id,
+      type,
+      todoId,
+      newTitle,
+      todoCompleted,
+      todoPending,
+    });
+
+    res.status(201).json({ message: "Analytics tracked" });
+  } catch (error) {
+    console.error("Error tracking analytics:", error);
+    res.status(500).json({ message: "Failed to track analytics" });
+  }
+};

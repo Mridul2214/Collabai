@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import axios from "axios";
 import "../css/whiteboard.css";
 
 export default function Whiteboard() {
@@ -22,9 +23,10 @@ export default function Whiteboard() {
   const [strokes, setStrokes] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
 
-  // ----- TEXT TOOL -----
   const [textBoxes, setTextBoxes] = useState([]);
   const [currentText, setCurrentText] = useState({ active: false, x: 0, y: 0, value: "" });
+
+  const token = localStorage.getItem("token");
 
   // ---------- INIT SOCKET ----------
   useEffect(() => {
@@ -119,7 +121,7 @@ export default function Whiteboard() {
     applyStroke(stroke, true);
   };
 
-  const applyStroke = (stroke, save) => {
+  const applyStroke = async (stroke, save) => {
     if (stroke.type === "text") {
       ctxRef.current.fillStyle = stroke.color;
       ctxRef.current.font = `${stroke.lineWidth * 5}px Arial`;
@@ -135,45 +137,91 @@ export default function Whiteboard() {
     if (save) {
       setStrokes(prev => [...prev, stroke]);
       socket?.emit("draw-stroke", { roomId, stroke });
+
+      // ✅ Analytics for stroke
+      try {
+        await axios.post("/api/analytics", {
+          type: "whiteboard_draw",
+          roomId,
+          tool: stroke.type,
+          color: stroke.color,
+          lineWidth: stroke.lineWidth,
+          textLength: stroke.text?.length || 0,
+        }, { headers: { Authorization: `Bearer ${token}` } });
+      } catch (err) {
+        console.error("Analytics failed:", err);
+      }
     }
   };
 
-  const clearCanvas = (emit = true) => {
+  const clearCanvas = async (emit = true) => {
     ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     if (emit) {
       socket?.emit("clear-board", roomId);
       setStrokes([]);
       setRedoStack([]);
       setTextBoxes([]);
+
+      // ✅ Analytics
+      try {
+        await axios.post("/api/analytics", {
+          type: "whiteboard_clear",
+          roomId,
+        }, { headers: { Authorization: `Bearer ${token}` } });
+      } catch (err) {
+        console.error("Analytics failed:", err);
+      }
     }
   };
 
   // ---------- UNDO / REDO ----------
-  const undo = () => {
+  const undo = async () => {
     if (strokes.length === 0) return;
     const newStrokes = [...strokes];
     const last = newStrokes.pop();
     setRedoStack(prev => [...prev, last]);
     setStrokes(newStrokes);
     redraw(newStrokes);
+
+    // ✅ Analytics
+    try {
+      await axios.post("/api/analytics", {
+        type: "whiteboard_undo",
+        roomId,
+        remainingStrokes: newStrokes.length,
+      }, { headers: { Authorization: `Bearer ${token}` } });
+    } catch (err) {
+      console.error("Analytics failed:", err);
+    }
   };
 
-  const redo = () => {
+  const redo = async () => {
     if (redoStack.length === 0) return;
     const newRedo = [...redoStack];
     const stroke = newRedo.pop();
     setRedoStack(newRedo);
     setStrokes(prev => [...prev, stroke]);
     redraw([...strokes, stroke]);
+
+    // ✅ Analytics
+    try {
+      await axios.post("/api/analytics", {
+        type: "whiteboard_redo",
+        roomId,
+        totalStrokes: strokes.length + 1,
+      }, { headers: { Authorization: `Bearer ${token}` } });
+    } catch (err) {
+      console.error("Analytics failed:", err);
+    }
   };
 
   const redraw = (strokesArray) => {
-    clearCanvas(false);
+    ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     strokesArray.forEach(s => applyStroke(s, false));
   };
 
-  // ---------- TEXT BOX HANDLING ----------
-  const addText = () => {
+  // ---------- TEXT TOOL ----------
+  const addText = async () => {
     if (!currentText.value.trim()) return;
     const stroke = {
       type: "text",
@@ -183,14 +231,27 @@ export default function Whiteboard() {
       color,
       lineWidth
     };
-    applyStroke(stroke, true);
+    await applyStroke(stroke, true);
     setCurrentText({ active: false, x: 0, y: 0, value: "" });
   };
 
-  const leaveRoom = () => {
+  // ---------- LEAVE ROOM ----------
+  const leaveRoom = async () => {
     if (!socket) return;
     socket.emit("leave-room", { roomId, username });
     socket.disconnect();
+
+    // ✅ Analytics
+    try {
+      await axios.post("/api/analytics", {
+        type: "whiteboard_leave",
+        roomId,
+        username,
+      }, { headers: { Authorization: `Bearer ${token}` } });
+    } catch (err) {
+      console.error("Analytics failed:", err);
+    }
+
     navigate("/whiteboardcreate");
   };
 

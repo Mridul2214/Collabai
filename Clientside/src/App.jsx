@@ -9,11 +9,11 @@ import AIChat from './components/pages/Aichat';
 import KanbanBoard from './components/pages/Kanbanboard';
 import DocumentEditor from './components/pages/Documenteditor';
 import DocumentList from './components/pages/Documentlist';
-import Analytics from './components/pages/Analytics';
 import RoomCreate from './components/pages/Roomcreate';
 import Whiteboard from './components/pages/Whiteboard';
 import { ThemeProvider } from './components/theme/Themecontext';   // ✅ use ThemeProvider
 import ChatPage from './components/pages/Chatpage';
+import AnalyticsDashboard from './components/pages/Analyticsdashboard';
 
 const App = () => {
   return (
@@ -30,7 +30,7 @@ const App = () => {
           <Route path="/doc" element={<DocumentList />} />
           <Route path="/editor" element={<DocumentEditor />} />
           <Route path="/editor/:id" element={<DocumentEditor />} />
-          <Route path='/analytics' element={<Analytics />} />
+          <Route path='/analytics' element={<AnalyticsDashboard />} />
           <Route path='/whiteboardcreate' element={<RoomCreate />} />
           <Route path='/whiteboard/:roomId' element={<Whiteboard />} />
           <Route path='/chat' element={<ChatPage />} />

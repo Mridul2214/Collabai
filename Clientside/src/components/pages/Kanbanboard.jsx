@@ -38,21 +38,23 @@ const KanbanBoard = () => {
     try {
       const res = await axios.post(
         "http://localhost:3000/api/todo",
-        {
-          title: newTask,
-          status: "todo",
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { title: newTask, status: "todo" },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setTasks((prev) => ({
-        ...prev,
-        todo: [...prev.todo, res.data],
-      }));
-
+      setTasks((prev) => ({ ...prev, todo: [...prev.todo, res.data] }));
       setNewTask("");
+
+      // ✅ Analytics: track task creation
+      try {
+        await axios.post(
+          "http://localhost:3000/api/analytics",
+          { type: "todo_create", todoId: res.data._id },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } catch (err) {
+        console.error("Analytics tracking failed:", err);
+      }
     } catch (err) {
       console.error("Error adding task", err);
     }
@@ -72,23 +74,7 @@ const KanbanBoard = () => {
         return { ...prev, [from]: updatedFrom, [to]: updatedTo };
       });
 
-      // ANALYTICS TRACKING - Added after successful task movement
-      try {
-        // Calculate counts for analytics
-        const completedCount = to === "done" ? tasks.done.length + 1 : tasks.done.length;
-        const pendingCount = (tasks.todo.length + tasks.inprogress.length) - (to === "done" ? 1 : 0);
-        
-        await axios.post('/api/analytics', {
-          todoCompleted: completedCount,
-          todoPending: pendingCount
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      } catch (analyticsError) {
-        console.error("Analytics tracking failed:", analyticsError);
-        // Don't show this error to the user as it doesn't affect the task functionality
-      }
-
+      // (Optional) You can add analytics tracking for moves if needed
     } catch (err) {
       console.error("Error moving task", err);
     }
@@ -111,6 +97,13 @@ const KanbanBoard = () => {
           t._id === task._id ? { ...t, title: data.title } : t
         ),
       }));
+
+      // ✅ Analytics: track task edit
+      await axios.post(
+        "http://localhost:3000/api/analytics",
+        { type: "todo_edit", todoId: data._id, newTitle: data.title },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
     } catch (err) {
       console.error("Error editing task", err);
     }
@@ -127,21 +120,23 @@ const KanbanBoard = () => {
         [from]: prev[from].filter((t) => t._id !== task._id),
       }));
 
-      // ANALYTICS TRACKING - Also track when tasks are deleted
+      // ✅ Analytics: track delete
       try {
         const completedCount = from === "done" ? tasks.done.length - 1 : tasks.done.length;
-        const pendingCount = (tasks.todo.length + tasks.inprogress.length) - (from === "done" ? 0 : 1);
-        
-        await axios.post('/api/analytics', {
-          todoCompleted: completedCount,
-          todoPending: pendingCount
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const pendingCount =
+          tasks.todo.length + tasks.inprogress.length - (from === "done" ? 0 : 1);
+
+        await axios.post(
+          "http://localhost:3000/api/analytics",
+          {
+            todoCompleted: completedCount,
+            todoPending: pendingCount,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
       } catch (analyticsError) {
         console.error("Analytics tracking failed:", analyticsError);
       }
-
     } catch (err) {
       console.error("Error deleting task", err);
     }

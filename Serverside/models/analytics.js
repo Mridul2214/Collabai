@@ -1,36 +1,29 @@
-// import mongoose from "mongoose";
+// models/analyticsModel.js
+import mongoose from "mongoose";
 
-// const analyticsSchema = new mongoose.Schema({
-//   userId: { 
-//     type: mongoose.Schema.Types.ObjectId, 
-//     ref: "User", 
-//     required: true,
-//     unique: true 
-//   },
-//   timeSpent: { 
-//     type: Number, 
-//     default: 0 
-//   }, // in minutes
-//   aiSearches: [{ 
-//     type: String 
-//   }], // queries asked in AI chat
-//   todos: {
-//     completed: { 
-//       type: Number, 
-//       default: 0 
-//     },
-//     pending: { 
-//       type: Number, 
-//       default: 0 
-//     }
-//   },
-//   lastUpdated: { 
-//     type: Date, 
-//     default: Date.now 
-//   }
-// });
+const activitySchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+  activityType: {
+    type: String,
+    required: true,
+    enum: ["ai_chat", "document_edit", "todo_update", "whiteboard_edit", "site_visit"]
+  },
+  details: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now
+  }
+});
 
-// // Create index for faster queries
-// analyticsSchema.index({ userId: 1 });
+// Index for faster queries
+activitySchema.index({ userId: 1, timestamp: 1 });
+activitySchema.index({ activityType: 1, timestamp: 1 });
 
-// export default mongoose.model("Analytics", analyticsSchema);
+export default mongoose.model("Analytics", activitySchema);

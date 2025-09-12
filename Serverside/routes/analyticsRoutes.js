@@ -1,11 +1,10 @@
-// import express from "express";
-// import { getAnalytics, getAIInsights, updateAnalytics } from "../controllers/analyticsController.js";
-// import { protect } from "../middleware/authMiddleware.js";
+// routes/analyticsRoutes.js
+import express from "express";
+import { getAnalytics, trackAnalytics } from "../controllers/analyticsController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
-// const router = express.Router();
+const router = express.Router();
 
-// router.post("/", protect, updateAnalytics);  
-// router.get("/:userId", protect, getAnalytics);
-// router.get("/:userId/insights", protect, getAIInsights);
-
-// export default router;
+router.get("/", protect, getAnalytics);
+router.post("/", protect, trackAnalytics);
+export default router;
